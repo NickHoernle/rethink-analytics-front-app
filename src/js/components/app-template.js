@@ -5,7 +5,7 @@ var Template = React.createClass({
   render:function(){
     return (
       <div className="container">
-        <Header />
+      	<Header />
         {this.props.children}
       </div>
     );

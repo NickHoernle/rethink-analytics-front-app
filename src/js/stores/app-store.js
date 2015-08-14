@@ -7,14 +7,25 @@ var CHANGE_EVENT = 'change';
 
 var _catalog = [];
 
+var _usersSessionView = [];
+
+var _sessions = [];
+
 for(var i=1; i<9; i++){
-  _catalog.push({
-    'id': 'Widget' + i,
-    'title':'Widget #' + i,
-    'summary': 'This is an awesome widget!',
-    'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus, commodi.',
-    'cost': i,
-    'img': '/assets/product.png'
+  _usersSessionView.push({
+    'id': 'User' + i,
+    'firstName':'FN #' + i,
+    'lastName': 'LN #' + i,
+    'chaptersCompleted': i,
+  });
+}
+
+for(var i=1; i<9; i++){
+  _sessions.push({
+    'id': 'Session' + i,
+    'startDateTime': '082359287592',
+    'endDateTime': '129812638917301',
+    'userId': 'teach' + i,
   });
 }
 
@@ -23,6 +34,10 @@ var _cartItems = [];
 function _removeItem(index){
   _cartItems[index].inCart = false;
   _cartItems.splice(index, 1);
+}
+
+function _loadSessionData(sessions){
+  _sessions = sessions; 
 }
 
 function _increaseItem(index){
@@ -87,9 +102,21 @@ var AppStore = assign(EventEmitter.prototype, {
     return _cartTotals()
   },
 
+  getUsers: function(){
+    return _usersSessionView;
+  },
+
+  getFromDateTime: function(){
+    return _usersSessionView.fromDateTime;
+  },
+
+  getSessions: function() {
+    return _sessions;
+  },
+
   dispatcherIndex: AppDispatcher.register(function(payload){
     var action = payload.action; // this is our action from handleViewAction
-    switch(action.actionType){
+    switch(action.type){
       case AppConstants.ADD_ITEM:
         _addItem(payload.action.item);
         break;
@@ -105,6 +132,10 @@ var AppStore = assign(EventEmitter.prototype, {
       case AppConstants.DECREASE_ITEM:
         _decreaseItem(payload.action.index);
         break;
+
+      case AppConstants.ServerActions.LOAD_SESSION_DATA:
+        _loadSessionData(action.payload);
+      break;
     }
 
     AppStore.emitChange();
