@@ -15,8 +15,8 @@ var CatalogItem = React.createClass({
             <p>{this.props.item.summary}</p>
             <p>${this.props.item.cost} <span className="text-success">{this.props.item.inCart && '(' + this.props.item.qty + ' in cart)'}</span></p>
             <div className="btn-group btn-group-xs">
-            <Link href={'/item/' + this.props.item.id} className="btn btn-default">Learn More</Link>
-            <AddToCart item={this.props.item} />
+              <Link href={'/item/' + this.props.item.id} className="btn btn-default">Learn More</Link>
+              <AddToCart item={this.props.item} />
             </div>
           </div>
 

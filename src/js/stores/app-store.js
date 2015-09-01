@@ -1,80 +1,144 @@
 var AppDispatcher = require('../dispatchers/app-dispatcher');
+var _ = require('lodash');
 var AppConstants = require('../constants/app-constants');
 var assign = require('react/lib/Object.assign');
+var RethinkApiUtils = require('./../utils/app-rethinkDataApiUtils');
 var EventEmitter = require('events').EventEmitter;
 
 var CHANGE_EVENT = 'change';
 
-var _catalog = [];
+var _chapterInformation = [];
 
 var _usersSessionView = [];
 
+var _users = [];
+
+var _viewToDateTime = new Date();
+
+var _viewFromDateTime = new Date( _viewToDateTime.getDate() - 7 );
+
 var _sessions = [];
 
-for(var i=1; i<9; i++){
-  _usersSessionView.push({
-    'id': 'User' + i,
-    'firstName':'FN #' + i,
-    'lastName': 'LN #' + i,
-    'chaptersCompleted': i,
+var _chaptersDoneByUsers = [];
+
+var courseProgress = null;
+
+var loadedChapters = [];
+
+var selectedChapter = null;
+
+function _getMostRecentSessionForUser(userId, sessions) {
+   var timeDate = 0;
+    for ( i = 0; i < sessions.length; i++ ) {
+      if ( sessions[i].endDateTime > timeDate ){
+        timeDate = sessions[i].endDateTime;
+      }
+    }
+    return timeDate;
+}
+
+function _markInteractionAsCorrect(userId, courseProgressId, interactionId) {
+  //do an API call too
+  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correct = 1;
+}
+
+function _markInteractionAsInorrect(userId, courseProgressId, interactionId) {
+  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correct = 2;
+}
+
+function _loadCourseProgress( _courseProgress ) {
+  courseProgress = _courseProgress;
+}
+
+function _selectUser( userId ) {
+  _users.forEach( function ( n, key ) {
+    if ( n.id == userId ) {
+      _users[key].selected = true;
+    }
   });
 }
 
-for(var i=1; i<9; i++){
-  _sessions.push({
-    'id': 'Session' + i,
-    'startDateTime': '082359287592',
-    'endDateTime': '129812638917301',
-    'userId': 'teach' + i,
+function _deselectUser( userId ) {
+  _users.forEach( function ( n, key ) {
+    if ( n.id == userId ) {
+      _users[key].selected = false;
+    }
   });
 }
 
-var _cartItems = [];
-
-function _removeItem(index){
-  _cartItems[index].inCart = false;
-  _cartItems.splice(index, 1);
+function _selectChapter( id ) {
+  if ( loadedChapters[ id ] != null ) {
+    selectedChapter = loadedChapters[ id ];
+  } else {
+    RethinkApiUtils.loadChapter( id );
+  }
 }
 
-function _loadSessionData(sessions){
+function _loadChapter( chapter ) {
+  loadedChapters[chapter.id] = chapter;
+  selectedChapter = chapter;
+}
+
+function _loadSessionData( sessions ){
   _sessions = sessions; 
 }
 
-function _increaseItem(index){
-  _cartItems[index].qty++;
-}
-
-function _decreaseItem(index){
-  if(_cartItems[index].qty>1){
-    _cartItems[index].qty--;
-  }
-  else {
-    _removeItem(index);
-  }
-}
-
-function _addItem(item){
-  if(!item.inCart){
-    item['qty'] = 1;
-    item['inCart'] = true;
-    _cartItems.push(item);
-  }
-  else {
-    _cartItems.forEach(function(cartItem, i){
-      if(cartItem.id===item.id){
-        _increaseItem(i);
+function _loadChapterInformation( chapters ){
+  // sanitise the chapters here
+  _chapterInformation = [];
+  for ( var gr in chapters._embedded.grades ) {
+    var grade = chapters._embedded.grades[gr];
+    for ( var subj in grade.subjects ) {
+      var subject = grade.subjects[subj];
+      for ( var cour in subject.coursesInSubject ) {
+        var course = subject.coursesInSubject[cour];
+        //console.log( course );
+        for ( var chapt in course.historyOfCourses )
+        {
+          _chapter = course.historyOfCourses[chapt];
+          var chapter = {
+            grade:grade.number,
+            subjectName:subject.name,
+            gradeName:grade.name,
+            createdDateTime:chapt,
+            name:course.currentName
+          }
+          _chapterInformation[_chapter] = chapter;
+          _chapterInformation.length++;
+        }
       }
-    });
+    }
   }
 }
 
-function _cartTotals(){
-  var qty =0, total = 0;
-  _cartItems.forEach(function(cartItem){
-    qty+=cartItem.qty;
-    total+=cartItem.qty*cartItem.cost;
-  });
-  return {'qty': qty, 'total': total};
+function _loadUsersData( users ) {
+    _users = users;
+    if ( users.length > 0 ){ 
+      _loadActiveChapters( users );
+    }
+}
+
+function _loadActiveChapters( users ) {
+  var chapters = [];
+  for ( var u in users ) {
+    var user = users[u];
+    user.selected=false;
+    for ( ch in user.chaptersCompleted ) {
+      var chapter = user.chaptersCompleted[ch].courseId;
+      if( chapters.indexOf(chapter) == -1 ) {
+        chapters.push(chapter);
+      }
+    }
+  }
+  _chaptersDoneByUsers = chapters;
+}
+
+function _updateViewFromDateTime( dateTime ) {
+  _viewFromDateTime = dateTime;
+}
+
+function _updateViewToDateTime( dateTime ) {
+  _viewToDateTime = dateTime;
 }
 
 var AppStore = assign(EventEmitter.prototype, {
@@ -90,20 +154,16 @@ var AppStore = assign(EventEmitter.prototype, {
     this.removeListener(CHANGE_EVENT, callback)
   },
 
-  getCart: function(){
-    return _cartItems
+  getViewFromDateTime: function() {
+    return _viewFromDateTime;
   },
 
-  getCatalog: function(){
-    return _catalog
+  getViewToDateTime: function() {
+    return _viewToDateTime;
   },
-
-  getCartTotals: function(){
-    return _cartTotals()
-  },
-
+  
   getUsers: function(){
-    return _usersSessionView;
+    return _users;
   },
 
   getFromDateTime: function(){
@@ -112,6 +172,22 @@ var AppStore = assign(EventEmitter.prototype, {
 
   getSessions: function() {
     return _sessions;
+  },
+
+  getChapterInformation: function() {
+    return _chapterInformation;
+  },
+
+  getChapters: function() {
+    return _chaptersDoneByUsers;
+  },
+
+  getSelectedChapter: function() {
+    return selectedChapter;
+  },
+
+  getCourseProgress: function() {
+    return courseProgress;
   },
 
   dispatcherIndex: AppDispatcher.register(function(payload){
@@ -129,12 +205,44 @@ var AppStore = assign(EventEmitter.prototype, {
         _increaseItem(payload.action.index);
         break;
 
-      case AppConstants.DECREASE_ITEM:
-        _decreaseItem(payload.action.index);
+      case AppConstants.UserActions.SELECT_CHAPTER:
+        _selectChapter( action.id );
+        break;
+
+      case AppConstants.UserActions.SELECT_USER:
+        _selectUser( action.id );
+        break;
+
+      case AppConstants.UserActions.DESELECT_USER:
+        _deselectUser( action.id );
+        break;
+
+      case AppConstants.UserActions.MARK_RESPONSE_AS_CORRECT:
+        _markInteractionAsCorrect(action.userId, action.courseId, action.interactionId);
+        break;
+
+      case AppConstants.UserActions.MARK_RESPONSE_AS_INCORRECT:
+        _markInteractionAsInorrect(action.userId, action.courseId, action.interactionId);
+        break;
+
+      case AppConstants.ServerActions.LOAD_CHAPTER:
+        _loadChapter( action.payload );
         break;
 
       case AppConstants.ServerActions.LOAD_SESSION_DATA:
         _loadSessionData(action.payload);
+        break;
+
+      case AppConstants.ServerActions.LOAD_USERS_DATA:
+        _loadUsersData(action.payload);
+        break;
+
+      case AppConstants.ServerActions.LOAD_COURSE_PROGRESS:
+        _loadCourseProgress(action.payload);
+        break;
+
+      case AppConstants.ServerActions.LOAD_CHAPTERS_DATA:
+        _loadChapterInformation(action.payload);
       break;
     }
 
