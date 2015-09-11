@@ -12,10 +12,12 @@ var Header = require('./components/header/app-header');
 
 var App = React.createClass({
   render () {
+    console.log("PROPS");
+    console.log(this.props);
     return (
       <div>
-        <Header />
-        <RouteHandler/>
+        <Header {...this.props}/>
+        <RouteHandler {...this.props}/>
       </div>
     )
   }
@@ -23,14 +25,14 @@ var App = React.createClass({
 
 var routes = (
   <Route handler={App}>
-  	<Route path="/" handler={HomePage} />
-    <Route path="sessionsdashboard" handler={SessionDashboard} />
-    <Route path="classlist" handler={classList} />
-    <Route path="chapterview" handler={ChapterView} />
+  	<Route path="teacherId/:teacherId" handler={HomePage} />
+    <Route path="teacherId/:teacherId/sessionsdashboard" handler={SessionDashboard} />
+    <Route path="teacherId/:teacherId/classlist" handler={classList} />
+    <Route path="teacherId/:teacherId/chapterview" handler={ChapterView} />
   </Route>
 );
 
 
-Router.run(routes, function (Handler) {  
-  React.render(<Handler/>, document.body);
+Router.run(routes, function (Handler, state) {  
+  React.render(<Handler {...state}/>, document.body);
 });

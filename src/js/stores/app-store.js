@@ -27,6 +27,8 @@ var loadedChapters = [];
 
 var selectedChapter = null;
 
+var markedAnswers = [];
+
 function _getMostRecentSessionForUser(userId, sessions) {
    var timeDate = 0;
     for ( i = 0; i < sessions.length; i++ ) {
@@ -37,13 +39,49 @@ function _getMostRecentSessionForUser(userId, sessions) {
     return timeDate;
 }
 
-function _markInteractionAsCorrect(userId, courseProgressId, interactionId) {
-  //do an API call too
-  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correct = 1;
+function markUserResponsesInChapter( users, selectedChapter, courseProgress ) {
+  markedAnswers = [];
+  if ( selectedChapter != null ){
+    selectedChapter.interactions.map( function ( interaction, k ){
+      var markedUsers = _users.map( function (user, i ) {
+        if ( user.selected == true ){
+          if ( courseProgress[user.id] ) {
+            var myCourseProgress = courseProgress[user.id];
+            var myResponse = _.find( myCourseProgress.interactionResponses, {'id': interaction.id} );
+            if ( myResponse ) {
+              if ( !myResponse.correctMarking ) {
+                myResponse.correctMarking=0; //undefined
+              }
+              if ( myResponse.response ) {
+                markedAnswers.push({
+                  userId:user.id,
+                  courseProgressId:myCourseProgress.id,
+                  interactionId:interaction.id,
+                  correctMarking:myResponse.correctMarking
+                });
+              }
+            }
+          }
+        }
+      });
+    });
+  }
 }
 
-function _markInteractionAsInorrect(userId, courseProgressId, interactionId) {
-  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correct = 2;
+function _markInteraction(userId, courseProgressId, interactionId, correct) {
+  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correctMarking = correct;
+  if ( _.find( markedAnswers, function(answer){
+    return ( answer.userId == userId && answer.courseProgressId == courseProgressId && answer.interactionId == interactionId)
+  })){
+    _.find(markedAnswers, { 'userId':userId, 'courseProgressId':courseProgressId, 'interactionId':interactionId }).correctMarking = correct;
+  } else {
+    markedAnswers.push({
+      userId:userId,
+      courseProgressId:courseProgressId,
+      interactionId:interactionId,
+      correctMarking:correctMarking
+    });
+  }
 }
 
 function _loadCourseProgress( _courseProgress ) {
@@ -56,6 +94,7 @@ function _selectUser( userId ) {
       _users[key].selected = true;
     }
   });
+  markUserResponsesInChapter( _users, selectedChapter, courseProgress );
 }
 
 function _deselectUser( userId ) {
@@ -64,6 +103,7 @@ function _deselectUser( userId ) {
       _users[key].selected = false;
     }
   });
+  markUserResponsesInChapter( _users, selectedChapter, courseProgress );
 }
 
 function _selectChapter( id ) {
@@ -92,7 +132,6 @@ function _loadChapterInformation( chapters ){
       var subject = grade.subjects[subj];
       for ( var cour in subject.coursesInSubject ) {
         var course = subject.coursesInSubject[cour];
-        //console.log( course );
         for ( var chapt in course.historyOfCourses )
         {
           _chapter = course.historyOfCourses[chapt];
@@ -123,10 +162,23 @@ function _loadActiveChapters( users ) {
   for ( var u in users ) {
     var user = users[u];
     user.selected=false;
-    for ( ch in user.chaptersCompleted ) {
-      var chapter = user.chaptersCompleted[ch].courseId;
-      if( chapters.indexOf(chapter) == -1 ) {
-        chapters.push(chapter);
+    for ( ch in user.chaptersWorkedOn ) {
+      var id = user.chaptersWorkedOn[ch].courseId;
+      var lastActive = user.chaptersWorkedOn[ch].lastActiveOnCourse;
+      var numberOfCompletedInteractions = user.chaptersWorkedOn[ch].numberOfCompletedInteractions;
+      var requiredNumberOfInteractions = user.chaptersWorkedOn[ch].requiredNumberOfInteractions;
+      if( !(_.find( chapters, {'id':id } )) && lastActive > 0 ) {
+        chapters.push(
+        {
+          'id':id,
+          'lastActive':lastActive,
+          'numberOfCompletedInteractions':numberOfCompletedInteractions,
+          'requiredNumberOfInteractions':requiredNumberOfInteractions
+        });
+      } else {
+          if ( lastActive > _.result(_.find( chapters, {'id':id } ), 'lastActive' ) ) {
+            _.find( chapters, {'id':id } ).lastActive = lastActive;
+          }
       }
     }
   }
@@ -190,6 +242,10 @@ var AppStore = assign(EventEmitter.prototype, {
     return courseProgress;
   },
 
+  getAnswersArray: function() {
+    return markedAnswers;
+  },
+
   dispatcherIndex: AppDispatcher.register(function(payload){
     var action = payload.action; // this is our action from handleViewAction
     switch(action.type){
@@ -217,12 +273,12 @@ var AppStore = assign(EventEmitter.prototype, {
         _deselectUser( action.id );
         break;
 
-      case AppConstants.UserActions.MARK_RESPONSE_AS_CORRECT:
-        _markInteractionAsCorrect(action.userId, action.courseId, action.interactionId);
+      case AppConstants.UserActions.MARK_RESPONSE:
+        _markInteraction(action.userId, action.courseId, action.interactionId, action.correct);
         break;
 
-      case AppConstants.UserActions.MARK_RESPONSE_AS_INCORRECT:
-        _markInteractionAsInorrect(action.userId, action.courseId, action.interactionId);
+      case AppConstants.UserActions.LOAD_MARKED_RESPONSES:
+        _loadMarkedResponses( action.markedResponses );
         break;
 
       case AppConstants.ServerActions.LOAD_CHAPTER:

@@ -1,6 +1,7 @@
 var React = require('react');
 var AppStore = require('../../stores/app-store');
 var ApiActionCreators = require('../../actions/ApiActionCreators');
+var AppActions = require('../../actions/app-actions');
 var StoreWatchMixin = require('../../mixins/StoreWatchMixin');
 var RethinkApiUtils = require('../../utils/app-rethinkDataApiUtils');
 var AnalyticsApiUtils = require('../../utils/app-analyticsApiUtils');
@@ -8,7 +9,12 @@ var LoadingBar = require('./../loadingBar/loadingBar');
 var ChapterSelection = require('./chaptersSelection');
 var ClassListSelection = require('./classListSelection');
 var DisplayChapter = require('./displayChapter');
+
+var _ = require('lodash');
 var ReactBootstrap = require('react-bootstrap'),
+    PanelGroup = ReactBootstrap.PanelGroup,
+    Panel = ReactBootstrap.Panel,
+    Tabs = ReactBootstrap.Tabs,
     DropdownButton = ReactBootstrap.DropdownButton,
     MenuItem = ReactBootstrap.MenuItem;
 
@@ -27,7 +33,8 @@ function getAppStateFromStores(){
       chapters:chapters,
       chapterMapping:chapterMapping,
       sessions: sessions,
-      loading:true
+      loading:true,
+      activeKey:'1'
     });
   }
   return ({
@@ -42,8 +49,12 @@ function getAppStateFromStores(){
 }
 
 var ChapterView = React.createClass({
-    getInitialState: function() {
+  getInitialState: function() {
       return ( getAppStateFromStores() );
+  },
+
+  handleSelect: function(activeKey) {
+    this.setState({ activeKey });
   },
 
   componentWillMount: function() {
@@ -72,23 +83,34 @@ var ChapterView = React.createClass({
 
   _onChange: function() {
     this.setState( getAppStateFromStores() );
+    if ( this.state.selectedChapter != null && this.state.activeKey == 1 ) {
+      this.setState({ activeKey:'2' });
+    }
   },
 
   render:function() {
     var selectedChapter = null;
     if( this.state.selectedChapter ){
-      selectedChapter = this.state.selectedChapter.name;
+      selectedChapterHeading = "Chapter: " + this.state.selectedChapter.name + " selected, click here to select new chapter";
+    } else {
+      selectedChapterHeading = "Step1, Select a Chapter: "
     };
     if ( this.state.loading ){
       return (<LoadingBar />
       );
     }
     return (
-      <div>
-        <ClassListSelection users={this.state.users} selectedChapter={this.state.selectedChapter} />
-        <ChapterSelection chapters={this.state.chapters} chapterMapping={this.state.chapterMapping} selectedChapter={selectedChapter} users={this.state.users} />
-        <DisplayChapter courseProgress={this.state.courseProgress} users={this.state.users} selectedChapter={this.state.selectedChapter} sessions={this.state.sessions} />
-      </div>
+      <PanelGroup activeKey={this.state.activeKey} defaultActiveKey='1' onSelect={this.handleSelect} accordion>
+        <Panel header={selectedChapterHeading} eventKey='1' bsStyle='primary'>
+          <ChapterSelection chapters={this.state.chapters} chapterMapping={this.state.chapterMapping} selectedChapter={selectedChapter} users={this.state.users} />          
+        </Panel>
+        <Panel header='Step2, Select the Available Users to View Coursework:' eventKey='2' bsStyle='primary'>
+          {<ClassListSelection users={this.state.users} selectedChapter={this.state.selectedChapter} />}
+        </Panel>
+        <Panel header='Step3, View Coursework:' eventKey='2' bsStyle='primary'>
+          {<DisplayChapter courseProgress={this.state.courseProgress} users={this.state.users} selectedChapter={this.state.selectedChapter} sessions={this.state.sessions} />}
+        </Panel>
+      </PanelGroup>
     );
   }
 });

@@ -1,9 +1,11 @@
 var React = require('react');
+var _ = require('lodash');
 var AppActions = require('../../actions/app-actions');
 var ReactBootstrap = require('react-bootstrap'),
 	ButtonToolbar = ReactBootstrap.ButtonToolbar,
 	Glyphicon = ReactBootstrap.Glyphicon,
 	Button = ReactBootstrap.Button,
+	ProgressBar = ReactBootstrap.ProgressBar,
 	Well = ReactBootstrap.Well;
 
 var UserButton = React.createClass({
@@ -17,12 +19,14 @@ var UserButton = React.createClass({
 
   	render:function(){
   		var name = this.props.name;
-  		if ( this.props.enabled ) {
+  		var course = _.find( this.props.user.chaptersWorkedOn , {'courseId':this.props.selectedChapter.id} );
+  		if ( this.props.enabled && course != null ) {
   			if ( this.props.user.selected ) {
   				return (
 	  				<Button onClick={this.handler}>
 	  					<Glyphicon glyph="check" />
 	  					{" " + name}
+	  					 <ProgressBar now={ Math.floor( course.numberOfCompletedInteractions * 100 / course.requiredNumberOfInteractions ) } label='%(percent)s%' />
 	  				</Button>
   				);
   			} else {
@@ -30,6 +34,7 @@ var UserButton = React.createClass({
 	  				<Button onClick={this.handler}>
 	  					<Glyphicon glyph="unchecked" />
 	  					{" " + name}
+	  					 <ProgressBar now={ Math.floor( course.numberOfCompletedInteractions * 100 / course.requiredNumberOfInteractions ) } label='%(percent)s%' />
 	  				</Button>
   				);
   			}
@@ -38,6 +43,7 @@ var UserButton = React.createClass({
   				<Button disabled>
   					<Glyphicon glyph="unchecked" />
 	  				{" " + name}
+	  				<p style={{fontSize:"11px"}}><i>Chapter Not Started</i></p>
   				</Button>
   			);
   		}

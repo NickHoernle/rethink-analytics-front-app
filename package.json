@@ -34,7 +34,7 @@
     "react-bootstrap-datetimepicker":"^0.0.18",
     "jquery":"^2.1.4",
     "moment":"^2.10.6",
-    "react-bootstrap":"^0.24.3",
+    "react-bootstrap":"^0.25.1",
     "react-loading":"^0.0.7",
     "watchify": "^3.2.3"
     },

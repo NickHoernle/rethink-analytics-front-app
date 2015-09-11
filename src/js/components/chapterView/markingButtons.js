@@ -1,5 +1,7 @@
 var React = require('react');
 var AppActions = require('../../actions/app-actions');
+var AnalyticsApiUtils = require('../../utils/app-analyticsApiUtils');
+
 var ReactBootstrap = require('react-bootstrap'),
 	ButtonToolbar = ReactBootstrap.ButtonToolbar,
 	Glyphicon = ReactBootstrap.Glyphicon,
@@ -8,11 +10,13 @@ var ReactBootstrap = require('react-bootstrap'),
 
 var MarkingButton = React.createClass({
 	handlerCorrect: function(){
-		AppActions.markResponseAsCorrect( this.props.user, this.props.courseProgress, this.props.interactionId);
+		AppActions.markResponse( this.props.user, this.props.courseProgress, this.props.interactionId, 1);
+		AnalyticsApiUtils.markResponse( this.props.user, this.props.courseProgress, this.props.interactionId, 1);
 	},
 
 	handlerIncorrect: function(){
-		AppActions.markResponseAsIncorrect( this.props.user, this.props.courseProgress, this.props.interactionId);
+		AppActions.markResponse( this.props.user, this.props.courseProgress, this.props.interactionId, 2);
+		AnalyticsApiUtils.markResponse( this.props.user, this.props.courseProgress, this.props.interactionId, 2);
 	},
 
   	render:function(){

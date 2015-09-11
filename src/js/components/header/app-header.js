@@ -21,28 +21,30 @@ var Header = React.createClass({
             <img id="Image-Rethink" src="http://res.cloudinary.com/he6wnpmm5/image/upload/v1435582819/sponsors/rethinkeducation.png" height="83px" width="256px"></img>
             <p><br/></p>
           </center>
+          <center>
             <ButtonToolbar>
               <Button bsStyle='link'>
-                <Glyphicon glyph="home" /> 
-                <a href="#/"> Home</a>
+                <Glyphicon glyph="home" />
+                <a href={"#/teacherId/" + this.props.params.teacherId}> Home</a>
               </Button>
               <Button bsStyle='link'>
                 <Glyphicon glyph="th-list" /> 
-                <a href="#/classlist"> Class List</a>
+                <a href={"#/teacherId/" + this.props.params.teacherId + "/classlist"}> Class List</a>
               </Button>
               <Button bsStyle='link'>
                 <Glyphicon glyph="dashboard" /> 
-                <a href="#/sessionsdashboard"> Session View</a>
+                <a href={"#/teacherId/" + this.props.params.teacherId + "/sessionsdashboard"}> Session View</a>
               </Button>
               <Button bsStyle='link'>
                 <Glyphicon glyph="book" /> 
-                <a href="#/chapterview"> Chapter View</a>
+                <a href={"#/teacherId/" + this.props.params.teacherId + "/chapterview"}> Chapter View</a>
               </Button>
               <Button bsStyle='link'>
                 <Glyphicon glyph="info-sign" /> 
                 Other
               </Button>
             </ButtonToolbar>
+            </center>
             <div id="hr-Rethink"><hr/></div> 
         </div>
     );

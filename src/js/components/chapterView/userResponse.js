@@ -1,6 +1,10 @@
 var React = require('react');
 var _ = require('lodash');
+
 var AppActions = require('../../actions/app-actions');
+var AppStore = require('../../stores/app-store');
+
+var _ = require('lodash');
 var MarkingButtons = require('./markingButtons');
 var ReactBootstrap = require('react-bootstrap'),
 	ButtonToolbar = ReactBootstrap.ButtonToolbar,
@@ -12,16 +16,20 @@ var ReactBootstrap = require('react-bootstrap'),
 var UserResponse = React.createClass({
   	render:function(){
   		var me = this;
-  		var activeUsers = _.sortBy( _.filter( this.props.users, {'selected':true}), 'lastActive' ).map( function (user, i) {
+  		var showResponse = false;
+  		var activeUsers = _.sortBy( _.filter( me.props.users, {'selected':true}), 'lastActive' ).map( function (user, i) {
 	  		var myCourseProgress = me.props.courseProgress[user.id];
+	  		var lastActive = new Date(user.lastActive);
 	  		var myResponse = _.find( myCourseProgress.interactionResponses, {'id': me.props.interactionId} );
-	  		var title = user.firstname + " " + user.lastname + " : " + user.lastActive;
+	  		var title = user.firstname + " " + user.lastname + " : " + lastActive.getDate() + "/" + lastActive.getMonth() + "/" + lastActive.getYear();
+	  		showResponse = true;
 	  		if ( myResponse ) {
-	  			if ( !myResponse.correct ) {
-	  				myResponse.correct=0; //undefined
+	  			if ( !myResponse.correctMarking ) {
+	  				myResponse.correctMarking=0; //undefined
 	  			}
+	  			var correct;
 		  		if ( myResponse.response ) {
-		  				switch (myResponse.correct){
+		  				switch (myResponse.correctMarking){
 		  					case 0: //undefined or don't know
 		  						correct='primary';
 		  						break;
@@ -45,9 +53,14 @@ var UserResponse = React.createClass({
 		  		}
 		  	}
 	  	});
-  		return (
-  			<Well>{activeUsers}</Well>
-  		);
+		if ( showResponse ){
+	  		return (
+	  			<div>{activeUsers}</div>
+	  		);
+	  	}
+	  	return (
+	  			<Well bsSize='medium'><i>No selected user responses</i></Well>
+	  		);
   	}
 });
 

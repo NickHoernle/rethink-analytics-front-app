@@ -31,7 +31,7 @@ var ApiActionCreators = {
 			type : AppConstants.ServerActions.LOAD_COURSE_PROGRESS,
 			payload : courseProgresses
 		})
-	}
+	},
 };
 
 module.exports = ApiActionCreators;

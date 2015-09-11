@@ -44,22 +44,21 @@ var AppActions = {
       id: id
     })
   },
-  markResponseAsCorrect: function( userId, courseId, interactionId ){
+  markResponse: function( userId, courseId, interactionId, correct ){
     AppDispatcher.handleViewAction({
-      type: AppConstants.UserActions.MARK_RESPONSE_AS_CORRECT,
+      type: AppConstants.UserActions.MARK_RESPONSE,
       userId: userId,
       courseId: courseId,
-      interactionId: interactionId
+      interactionId: interactionId,
+      correct: correct
     })
   },
-  markResponseAsIncorrect: function( userId, courseId, interactionId ){
+  loadMarkedResponses: function( markedResponses ) {
     AppDispatcher.handleViewAction({
-      type: AppConstants.UserActions.MARK_RESPONSE_AS_INCORRECT,
-      userId: userId,
-      courseId: courseId,
-      interactionId: interactionId
+      type: AppConstants.UserActions.LOAD_MARKED_RESPONSES,
+      markedResponses: markedResponses
     })
-  },
+  }
 }
 
 module.exports = AppActions;

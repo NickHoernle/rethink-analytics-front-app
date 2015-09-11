@@ -40,7 +40,7 @@ var AnalyticsApiUtils = {
 		URL_Mapping = URL_Mapping.substring(0,URL_Mapping.length - 1);
 		NProgress.start();
 		request
-		.get(API_URL+'/get-users?'+URL_Mapping)
+		.get(API_URL+'/users?'+URL_Mapping)
 		.end(function(error, response){
 			if (error){
 				// If no user found, user unregistered
@@ -52,7 +52,7 @@ var AnalyticsApiUtils = {
 			}else{
 				// Convert returned string to JSON object
 				var returnObject = JSON.parse(response.text);
-				ApiActionCreators.loadUsers(returnObject);
+				ApiActionCreators.loadUsers( returnObject );
 				NProgress.done()
 			}
 		});
@@ -67,9 +67,31 @@ var AnalyticsApiUtils = {
 				NProgress.done();
 			}else{
 				// Convert returned string to JSON object
-				console.log( API_URL+"/users/"+userId+"/topicId/"+topicId );
+				//console.log( API_URL+"/users/"+userId+"/topicId/"+topicId );
 				var returnObject = JSON.parse(response.text);
-				ApiActionCreators.loadUserCourseData(returnObject);
+				ApiActionCreators.loadUserCourseData( returnObject );
+				NProgress.done();
+			}
+		})
+	},
+
+	markResponse: function( userId, courseProgressId, interactionId, correct ){
+		var markedResponse = {
+			userId:userId,
+			courseProgressId:courseProgressId,
+			interactionId:interactionId,
+			correct:correct
+		};
+		NProgress.start();
+		request
+		.post(API_URL+"/markAnswer" )
+		.send(markedResponse)
+		.end(function(error, response){
+			if (error){
+				console.log("Server error, please try again later")
+				NProgress.done();
+			}else{
+				console.log("Success")
 				NProgress.done();
 			}
 		})

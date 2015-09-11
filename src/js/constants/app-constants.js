@@ -8,8 +8,8 @@ module.exports = {
 
   UserActions: keyMirror({
     SELECT_CHAPTER: null,
-    MARK_RESPONSE_AS_CORRECT: null,
-    MARK_RESPONSE_AS_INCORRECT: null,
+    MARK_RESPONSE: null,
+    LOAD_MARKED_RESPONSES: null,
     SELECT_USER: null,
     DESELECT_USER: null
   }),

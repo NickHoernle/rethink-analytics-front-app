@@ -14,13 +14,34 @@ var getAppStateFromStores = function(){
   AnalyticsApiUtils.loadUsers( userIds );
   AnalyticsApiUtils.loadSessions( userIds,fromDateTime );
   RethinkApiUtils.loadChapterInformation();
+  
+
+  /*TO IMPLEMENT ALL OF THESE DETAILS*/
+  /*var teacher = AppStore.getTeacherDetails( this.props.params.teacherId );
+  var usersInClass = AppStore.getUsersInClass( this.props.params.teacherId );
+  if ( teacher == null ) {
+    AnalyticsApiUtils.loadTeacherDetails( userIds );
+  } else {
+    if ( usersInClass == null ) {
+       AnalyticsApiUtils.loadUsers( teacher.studentsInClass );
+       return ({
+          teacher:teacher,
+          users:usersInClass,
+          loading:false
+       });
+    }
+  }
   return { 
-    null:null
-  };
+    teacher:teacher,
+    users:usersInClass,
+    loading:true
+  };*/
+  return ( {null:null} );
 };
 
 var HomePage = React.createClass({
   render:function(){
+    console.log("TeacherId: ", this.props.params.teacherId);
     return (
       <div className="row">
         <Jumbotron>
