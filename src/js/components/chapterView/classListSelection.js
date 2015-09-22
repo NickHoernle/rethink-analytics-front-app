@@ -24,7 +24,7 @@ var ClassListSelection = React.createClass({
   		for (var ch in user.chaptersWorkedOn ) {
   			var chapterCompleted = user.chaptersWorkedOn[ch];
   			if ( chapterCompleted.courseId == selectedChapter.id ){
-  				if ( chapterCompleted.numberOfCompletedInteractions > 10 ) {
+  				if ( chapterCompleted.numberOfCompletedInteractions > 5 ) {
   					enabled = true;
   					break;
   				}

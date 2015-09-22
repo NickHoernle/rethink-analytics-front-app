@@ -34,7 +34,6 @@ var ClassList = React.createClass({
 
   componentWillMount: function() {
     if ( this.state.users.length<1 ) {
-      console.log( "teacher", this.state.teacher );
       var userIds = this.state.teacher.usersInClass;
       AnalyticsApiUtils.loadUsers( userIds );
     }
@@ -68,16 +67,17 @@ var ClassList = React.createClass({
     var style1 = {verticalAlign:"middle", fontSize:"16px"};
     var mapping = this.state.chapterMapping;
   	var users_ = this.state.users.map(function( user, i ){
+      lastActive = new Date( user.lastActive );
+      console.log( "user", user );
       return (
             <tr key={i}>
-              <td style={style1}>{user.id}</td>
+              <td style={style1}>{i}</td>
               <td style={style1}>{user.firstname}</td>
               <td style={style1}>{user.lastname}</td>
-              <td style={style1}>{user.lastActive}</td>
+              <td style={style1}>{lastActive.getDate() + "/" + lastActive.getMonth() + "/" + lastActive.getFullYear() }</td>
               <td>
-                {//<RecentChaptersDisplay chapterMapping={mapping} userChapters={user.chaptersCompleted} />          
-                }
-               </td>
+                <RecentChaptersDisplay chapterMapping={mapping} userChapters={user.chaptersWorkedOn} />          
+              </td>
             </tr>
         );
       })

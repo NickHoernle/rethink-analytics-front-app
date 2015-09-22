@@ -112,6 +112,8 @@ function _selectChapter( id ) {
   } else {
     RethinkApiUtils.loadChapter( id );
   }
+  // new chapters selected therefore set selectedUsers to false:
+  _.forEach( _users, function( user ){ user.selected = false});
 }
 
 function _loadChapter( chapter ) {
@@ -167,18 +169,20 @@ function _loadActiveChapters( users ) {
       var lastActive = user.chaptersWorkedOn[ch].lastActiveOnCourse;
       var numberOfCompletedInteractions = user.chaptersWorkedOn[ch].numberOfCompletedInteractions;
       var requiredNumberOfInteractions = user.chaptersWorkedOn[ch].requiredNumberOfInteractions;
-      if( !(_.find( chapters, {'id':id } )) && lastActive > 0 ) {
-        chapters.push(
-        {
-          'id':id,
-          'lastActive':lastActive,
-          'numberOfCompletedInteractions':numberOfCompletedInteractions,
-          'requiredNumberOfInteractions':requiredNumberOfInteractions
-        });
-      } else {
-          if ( lastActive > _.result(_.find( chapters, {'id':id } ), 'lastActive' ) ) {
-            _.find( chapters, {'id':id } ).lastActive = lastActive;
-          }
+      if ( numberOfCompletedInteractions > 5 ) {
+        if( !(_.find( chapters, {'id':id } )) && lastActive > 0 ){
+          chapters.push(
+          {
+            'id':id,
+            'lastActive':lastActive,
+            'numberOfCompletedInteractions':numberOfCompletedInteractions,
+            'requiredNumberOfInteractions':requiredNumberOfInteractions
+          });
+        } else {
+            if ( lastActive > _.result(_.find( chapters, {'id':id } ), 'lastActive' ) ) {
+              _.find( chapters, {'id':id } ).lastActive = lastActive;
+            }
+        }
       }
     }
   }
@@ -204,6 +208,20 @@ var AppStore = assign(EventEmitter.prototype, {
 
   removeChangeListener: function(callback){
     this.removeListener(CHANGE_EVENT, callback)
+  },
+
+  logout: function(){
+    this._chapterInformation = [];
+    this._usersSessionView = [];
+    this._users = [];
+    this._viewToDateTime = new Date();
+    this._viewFromDateTime = new Date( _viewToDateTime.getDate() - 7 );
+    this._sessions = [];
+    this._chaptersDoneByUsers = [];
+    this.courseProgress = null;
+    this.loadedChapters = [];
+    this.selectedChapter = null;
+    this.markedAnswers = [];
   },
 
   getViewFromDateTime: function() {

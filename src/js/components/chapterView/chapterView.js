@@ -1,4 +1,5 @@
 var React = require('react');
+var _ = require('lodash');
 var AppStore = require('../../stores/app-store');
 var ApiActionCreators = require('../../actions/ApiActionCreators');
 var AppActions = require('../../actions/app-actions');
@@ -37,7 +38,8 @@ function getAppStateFromStores(){
       chapterMapping:chapterMapping,
       sessions: sessions,
       loading:true,
-      activeKey:'1'
+      activeKey1:'1',
+      activeKey2:'0'
     });
   }
   return ({
@@ -58,11 +60,29 @@ var ChapterView = React.createClass({
   },
 
   handleSelect: function(activeKey) {
-    this.setState({ activeKey });
+    switch ( activeKey ) {
+      case "1":
+        this.setState({ activeKey1:activeKey });
+        this.setState({ activeKey2:'0' });
+        break;
+      case "2":
+        if ( this.state.activeKey1 == '2' ) {
+          this.setState({ activeKey1:'0' });
+        } else {
+          this.setState({ activeKey1:'2' });
+        }
+        break;
+      case "3":
+        if ( this.state.activeKey2 == '3' ) {
+          this.setState({ activeKey2:'0' });
+        } else {
+          this.setState({ activeKey2:'3' });
+        }
+        break;
+    }
   },
 
   componentWillMount: function() {
-    console.log( "teacher", this.state.teacher );
     var userIds = this.state.teacher.usersInClass;
     var today = new Date();
     today.setDate( today.getDate() - 7 );
@@ -88,13 +108,18 @@ var ChapterView = React.createClass({
 
   _onChange: function() {
     this.setState( getAppStateFromStores() );
-    if ( this.state.selectedChapter != null && this.state.activeKey == 1 ) {
-      this.setState({ activeKey:'2' });
+    if ( this.state.selectedChapter != null && this.state.activeKey1 == "1" ) {
+      this.setState({activeKey1:'2', activeKey2:'0'});
+    } else if ( this.state.selectedChapter != null && this.state.activeKey1 == "2" ) {
+      if ( _.find( this.state.users , {"selected":true} ) != null ) {
+        this.setState({activeKey2:'3'});
+      }
     }
   },
 
   render:function() {
     var selectedChapter = null;
+    var displayChapter = false;
     if( this.state.selectedChapter ){
       selectedChapterHeading = "Chapter: " + this.state.selectedChapter.name + " selected, click here to select new chapter";
     } else {
@@ -105,17 +130,21 @@ var ChapterView = React.createClass({
       );
     }
     return (
-      <PanelGroup activeKey={this.state.activeKey} defaultActiveKey='1' onSelect={this.handleSelect} accordion>
-        <Panel header={selectedChapterHeading} eventKey='1' bsStyle='primary'>
-          <ChapterSelection chapters={this.state.chapters} chapterMapping={this.state.chapterMapping} selectedChapter={selectedChapter} users={this.state.users} />          
-        </Panel>
-        <Panel header='Step2, Select the Available Users to View Coursework:' eventKey='2' bsStyle='primary'>
-          {<ClassListSelection users={this.state.users} selectedChapter={this.state.selectedChapter} />}
-        </Panel>
-        <Panel header='Step3, View Coursework:' eventKey='2' bsStyle='primary'>
-          {<DisplayChapter courseProgress={this.state.courseProgress} users={this.state.users} selectedChapter={this.state.selectedChapter} sessions={this.state.sessions} />}
-        </Panel>
-      </PanelGroup>
+      <div>
+        <PanelGroup activeKey={this.state.activeKey1} defaultActiveKey='1' onSelect={this.handleSelect} accordion>
+          <Panel header={selectedChapterHeading} eventKey='1' bsStyle='primary'>
+            <ChapterSelection chapters={this.state.chapters} chapterMapping={this.state.chapterMapping} selectedChapter={selectedChapter} users={this.state.users} />          
+          </Panel>
+          <Panel header='Step2, Select the Available Users to View Coursework:' onSelect={this.handleSelect} eventKey='2' bsStyle='primary'>
+            {<ClassListSelection users={this.state.users} selectedChapter={this.state.selectedChapter} />}
+          </Panel>
+        </PanelGroup>
+        <PanelGroup activeKey={this.state.activeKey2} onSelect={this.handleSelect} defaultActiveKey='0' accordion>
+          <Panel header='Step3, View Coursework:' eventKey='3' bsStyle='primary' >
+              {<DisplayChapter courseProgress={this.state.courseProgress} users={this.state.users} selectedChapter={this.state.selectedChapter} sessions={this.state.sessions} />}
+          </Panel>
+        </PanelGroup>
+      </div>
     );
   }
 });

@@ -25,7 +25,6 @@ var Login = React.createClass({
   getInitialState: function() {
     var loggedInUser = false;
     var teacher = LoginStore.getTeacher();
-    var teacher = LoginStore.getTeacher();
     if( teacher != null )
       loggedInUser = true;
     return (
@@ -40,6 +39,7 @@ var Login = React.createClass({
 
   login: function() {
     AuthService.login( this.state.emailAddress, this.state.password );
+    console.log("Attempting login");
   },
 
   handleChange: function( event ) {

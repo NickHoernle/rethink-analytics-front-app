@@ -7,7 +7,8 @@ var ReactBootstrap = require('react-bootstrap'),
 	ButtonToolbar = ReactBootstrap.ButtonToolbar,
 	Glyphicon = ReactBootstrap.Glyphicon,
 	Button = ReactBootstrap.Button,
-	Well = ReactBootstrap.Well;
+	Well = ReactBootstrap.Well,
+  Popover = ReactBootstrap.Popover;
 
 
 function createMarkup(value) { 
@@ -45,23 +46,32 @@ var InteractionDisplay = React.createClass({
       switch ( interaction.type ) {
         case "instruction":
           return (
-                <Panel key={key} collapsible bsSize={"small"} defaultExpanded={false} header={<h style={{fontSize:"12px"}}><Glyphicon glyph="chevron-right" />This is an instruction that requires no response. Click to view instruction</h>}>
-                  {//<div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
-                  }<div>{sanitizedInteraction}</div> 
-                </Panel>
+                  <div className="bubble me" key={me.props.key}>
+                    <div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
+                  </div>
             );
         case "prompt":
           return (
-                  <Panel key={me.props.key} collapsible bsSize={"small"} defaultExpanded={true} header={<p>{sanitizedInteraction}</p>} bsStyle='info'>
+                  <div>
+                    <div className="bubble me" key={me.props.key}>
+                      <div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
+                    </div>
+                    <div className="bubble you" key={me.props.key}>
                     <UserResponse interactionId={interaction.id} users={me.props.users} sessions={me.props.sessions} courseProgress={me.props.courseProgress} selectedChapter={me.props.selectedChapter} />
-                  </Panel>
-            );
+                    </div>
+                  </div>
+              );
         default:
           return (
-              null
+              <div />
             );
       }
     }
 });
 
 module.exports = InteractionDisplay;
+
+                /*<Panel key={key} collapsible bsSize={"small"} defaultExpanded={false} header={<h style={{fontSize:"12px"}}><Glyphicon glyph="chevron-right" />This is an instruction that requires no response. Click to view instruction</h>}>
+                  //<div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
+                  }<div>{sanitizedInteraction}</div> 
+                </Panel>*/

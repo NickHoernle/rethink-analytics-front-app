@@ -68,7 +68,7 @@ var DisplayChapter = React.createClass({
               <p style={{fontSize:"14px"}}><i>{numberOfCorrectAnswers} correct responses; {numberOfIncorrectAnswers}  incorrect responses; {numberOfUnknownAnswers} unmarked responses</i></p></div>
             );
           return(
-                  <Panel key={i} collapsible defaultExpanded={false} header={title}>
+                  <Panel key={i} collapsible defaultExpanded={false} header={title} >
                     {subHeadings}
                   </Panel>
                 );

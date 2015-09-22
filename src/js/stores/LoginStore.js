@@ -43,7 +43,7 @@ var LoginStore = assign(EventEmitter.prototype, {
 
   dispatcherIndex: AppDispatcher.register(function(payload){
     var action = payload.action; // this is our action from handleViewAction
-    console.log( "action", action );
+    //console.log( "action", action );
     switch(action.type){
       case LoginConstants.LOGIN_USER:
         _teacher = action.payload.teacher;

@@ -9,10 +9,15 @@ var DayPicker = React.createClass({
 	componentDidMount: function(){
 		AppStore.addChangeListener(this._onChange);
 	},
+
+	componentDidMount: function(){
+		AppStore.removeChangeListener(this._onChange);
+	},
+
   	_onChange: function(dateTime){
   		console.log(dateTime);
-
   	},
+
   	render: function() {
     	return <DateTimeField onChange={this._onChange} inputFormat="DD/MM/YY" />
   	}

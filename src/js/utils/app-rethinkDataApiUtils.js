@@ -1,6 +1,6 @@
 var request = require('superagent');
-//var API_URL = process.env.API_URL || "http://localhost:8080";
-var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
+var API_URL = process.env.API_URL || "http://localhost:8080";
+//var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
 var ApiActionCreators = require('../actions/ApiActionCreators');
 var NProgress = require('nprogress-npm');
 

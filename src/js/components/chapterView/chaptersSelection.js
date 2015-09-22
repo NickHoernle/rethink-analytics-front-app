@@ -1,5 +1,6 @@
 var React = require('react');
 var _ = require('lodash');
+var SelectChapter = require('./selectChapter');
 var ReactBootstrap = require('react-bootstrap'),
     DropdownButton = ReactBootstrap.DropdownButton,
     ButtonToolbar = ReactBootstrap.ButtonToolbar,
@@ -7,7 +8,6 @@ var ReactBootstrap = require('react-bootstrap'),
     ButtonGroup = ReactBootstrap.ButtonGroup,
     Panel = ReactBootstrap.Panel,
     Tab = ReactBootstrap.Tab;
-var SelectChapter = require('./selectChapter');
 
 
 function getFilteredAndSortedChapters( chapters, fromDate, toDate ) {

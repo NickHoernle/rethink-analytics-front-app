@@ -8,7 +8,8 @@ var Router = require('react-router');
 var RouterContainer = require('./RouterContainer');
 var Route = Router.Route;
 var RouteHandler = Router.RouteHandler;
-var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
+//var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
+var API_URL = process.env.API_URL || "http://localhost:8080";
 
 var AuthService = {
 
@@ -31,18 +32,24 @@ var AuthService = {
 
   login: function( username, password ) {
     NProgress.start();
+    console.log( "Posting to: " + LoginConstants.LOGIN_URL );
+    console.log( "username", username );
+    console.log( "password", password );
     request
     .post( LoginConstants.LOGIN_URL )
-    .send({ username:username, password:password})
     .set('accept', 'application/json')
+    .send({ username:username, password:password})
     .end(function(error, response){
       if (error){
         localStorage.removeItem('jwt');
-        RouterContainer.get().transitionTo('/');
+        //RouterContainer.get().transitionTo('/login');
+        console.log("error", error);
+        alert(error);
         NProgress.done();
       }else{
         var jwt = response.header["x-auth-token"];
         var teacher = JSON.parse(response.text);
+        console.log ("Login teacher", teacher);
         LoginActions.loginUser( jwt , teacher);
         NProgress.done();
       }
