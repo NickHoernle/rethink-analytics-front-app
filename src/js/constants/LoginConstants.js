@@ -1,5 +1,5 @@
-var BASE_URL = 'http://localhost:8080/';
-//var BASE_URL = 'http://rethink-data.herokuapp.com/';
+//var BASE_URL = 'http://localhost:8080/';
+var BASE_URL = 'http://rethink-data.herokuapp.com/';
 
 module.exports = {
   BASE_URL: BASE_URL,
