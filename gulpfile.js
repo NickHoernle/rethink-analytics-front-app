@@ -79,7 +79,7 @@ gulp.task('build', function(){
   })
     .bundle()
     .pipe(source(path.MINIFIED_BUILD))
-    //.pipe(streamify(uglify()))
+    .pipe(streamify(uglify()))
     .pipe(gulp.dest(path.DEST_BUILD));
 });
 

@@ -1,6 +1,6 @@
 var request = require('superagent');
-var API_URL = process.env.API_URL || "http://localhost:8080";
-//var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
+//var API_URL = process.env.API_URL || "http://localhost:8080";
+var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
 var ApiActionCreators = require('../actions/ApiActionCreators');
 var NProgress = require('nprogress-npm');
 
@@ -60,7 +60,6 @@ var RethinkApiUtils = {
 			if (error) {
 				NProgress.done();
 			}else{
-				console.log(API_URL+'/get-course-progress/'+id+'/users/?' + URL_Mapping);
 				var returnObject = JSON.parse(response.text);
 				ApiActionCreators.loadCourseProgress( returnObject )
 				NProgress.done();
