@@ -5,6 +5,7 @@ var RethinkApiUtils = require('../../utils/app-rethinkDataApiUtils');
 var AnalyticsApiUtils = require('../../utils/app-analyticsApiUtils');
 var RecentChaptersDisplay = require('./recentlyWorkedOnTopics.js');
 var LoadingBar = require('./../loadingBar/loadingBar');
+var LoginStore = require('./../../stores/LoginStore');
 var ReactBootstrap = require('react-bootstrap'),
   Button = ReactBootstrap.Button,
   Table = ReactBootstrap.Table,
@@ -13,16 +14,19 @@ var ReactBootstrap = require('react-bootstrap'),
 var ClassList = React.createClass({
   getInitialState: function() {
     var users = AppStore.getUsers();
+    var teacher = LoginStore.getTeacher();
     var chapterMapping = AppStore.getChapterInformation();
     if( users.length < 1 || chapterMapping.length < 1 ) {
       return ({
         users:users,
+        teacher:teacher,
         chapterMapping:chapterMapping,
         loading:true
       });
     }
     return ({
         users:users,
+        teacher:teacher,
         chapterMapping:chapterMapping,
         loading:false
     });
@@ -30,7 +34,8 @@ var ClassList = React.createClass({
 
   componentWillMount: function() {
     if ( this.state.users.length<1 ) {
-      var userIds = ["teach01","teach02","teach03","teach04","teach10","teach11"];
+      console.log( "teacher", this.state.teacher );
+      var userIds = this.state.teacher.usersInClass;
       AnalyticsApiUtils.loadUsers( userIds );
     }
     if ( this.state.chapterMapping.length<1 ) {
@@ -70,7 +75,8 @@ var ClassList = React.createClass({
               <td style={style1}>{user.lastname}</td>
               <td style={style1}>{user.lastActive}</td>
               <td>
-                <RecentChaptersDisplay chapterMapping={mapping} userChapters={user.chaptersCompleted} />          
+                {//<RecentChaptersDisplay chapterMapping={mapping} userChapters={user.chaptersCompleted} />          
+                }
                </td>
             </tr>
         );

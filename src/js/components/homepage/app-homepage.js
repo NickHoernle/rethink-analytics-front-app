@@ -6,14 +6,14 @@ var ReactBootstrap = require('react-bootstrap'),
   Jumbotron = ReactBootstrap.Jumbotron,
   Button = ReactBootstrap.Button;
 
-var getAppStateFromStores = function(){
-  var userIds = ["teach01","teach02","teach03","teach04","teach10","teach11"];
+var getAppStateFromStores = function() {
+  /*var userIds = ["teach01","teach02","teach03","teach04","teach10","teach11"];
   var today = new Date();
   today.setDate( today.getDate() - 7 );
   var fromDateTime = today.getMilliseconds();
-  AnalyticsApiUtils.loadUsers( userIds );
-  AnalyticsApiUtils.loadSessions( userIds,fromDateTime );
-  RethinkApiUtils.loadChapterInformation();
+  //AnalyticsApiUtils.loadUsers( userIds );
+  //AnalyticsApiUtils.loadSessions( userIds,fromDateTime );
+  //RethinkApiUtils.loadChapterInformation();
   
 
   /*TO IMPLEMENT ALL OF THESE DETAILS*/
@@ -41,7 +41,6 @@ var getAppStateFromStores = function(){
 
 var HomePage = React.createClass({
   render:function(){
-    console.log("TeacherId: ", this.props.params.teacherId);
     return (
       <div className="row">
         <Jumbotron>

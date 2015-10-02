@@ -1,11 +1,16 @@
 var request = require('superagent');
-var API_URL = process.env['API_URL'] || "http://rethink-data.herokuapp.com";
-//var API_URL = process.env.API_URL || "http://localhost:8080";
+//var API_URL = process.env['API_URL'] || "http://rethink-data.herokuapp.com";
+var API_URL = process.env.API_URL || "http://localhost:8080";
 var ApiActionCreators = require('../actions/ApiActionCreators');
 
 var NProgress = require('nprogress-npm');
 
+var jwt = null;
+
 var AnalyticsApiUtils = {
+	loadJwt: function( _jwt ) {
+		jwt = _jwt;
+	},
 
 	loadSessions: function( userIdArray, fromDateTime ){
 		// build the URL
@@ -18,6 +23,7 @@ var AnalyticsApiUtils = {
 		NProgress.start();
 		request
 		.get(API_URL+"/get-user-progress?"+ URL_Mapping + "fromDateTime=" + fromDateTime)
+		.set('x-auth-token', jwt)
 		.end(function(error, response){		
 			if (error) {
 				NProgress.done();
@@ -41,6 +47,7 @@ var AnalyticsApiUtils = {
 		NProgress.start();
 		request
 		.get(API_URL+'/users?'+URL_Mapping)
+		.set("x-auth-token", jwt)
 		.end(function(error, response){
 			if (error){
 				// If no user found, user unregistered
@@ -62,6 +69,7 @@ var AnalyticsApiUtils = {
 		NProgress.start();
 		request
 		.get(API_URL+"/users/"+userId+"/topicId/"+topicId)
+		.set("x-auth-token", jwt)
 		.end(function(error, response){
 			if (error){
 				NProgress.done();
@@ -85,6 +93,7 @@ var AnalyticsApiUtils = {
 		NProgress.start();
 		request
 		.post(API_URL+"/markAnswer" )
+		.set("x-auth-token", jwt)
 		.send(markedResponse)
 		.end(function(error, response){
 			if (error){

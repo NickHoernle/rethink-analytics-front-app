@@ -11,15 +11,18 @@ var ReactBootstrap = require('react-bootstrap'),
     Table = ReactBootstrap.Table;
 var SessionBarChart = require('./myBarChart');
 var SessionTable = require('./sessionDisplayTable');
+var LoginStore = require('./../../stores/LoginStore');
 
 var SessionDashboard = React.createClass({
   getInitialState: function() {
     var users = AppStore.getUsers();
     var chapterMapping = AppStore.getChapterInformation();
+    var teacher = LoginStore.getTeacher();
     var sessions = AppStore.getSessions();
     if( users.length < 1 || chapterMapping.length < 1 || sessions.length < 1 ) {
       return ({
         users:users,
+        teacher:teacher,
         chapterMapping:chapterMapping,
         sessions: sessions,
         loading:true
@@ -27,6 +30,7 @@ var SessionDashboard = React.createClass({
     }
     return ({
         users:users,
+        teacher:teacher,
         chapterMapping:chapterMapping,
         sessions: sessions,
         loading:false
@@ -34,7 +38,8 @@ var SessionDashboard = React.createClass({
   },
 
   componentWillMount: function() {
-    var userIds = ["teach01","teach02","teach03","teach04","teach10","teach11"];
+    console.log( "teacher", this.state.teacher );
+    var userIds = this.state.teacher.usersInClass;
     var today = new Date();
     today.setDate( today.getDate() - 7 );
     var fromDateTime = today.getMilliseconds();

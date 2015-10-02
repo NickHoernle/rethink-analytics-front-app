@@ -1,14 +1,23 @@
 var request = require('superagent');
 var API_URL = process.env.API_URL || "http://localhost:8080";
-var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
-//var ApiActionCreators = require('../actions/ApiActionCreators');
+//var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
+var ApiActionCreators = require('../actions/ApiActionCreators');
 var NProgress = require('nprogress-npm');
 
+var LoginStore = require('./../stores/LoginStore');
+
+var jwt = null;
+
 var RethinkApiUtils = {
+	loadJwt: function( _jwt ) {
+		jwt = _jwt;
+	},
+	
 	loadChapterInformation: function(){
 		NProgress.start();
 		request
 		.get(API_URL+'/grades')
+		.set('x-auth-token', jwt)
 		.end(function(error, response){		
 			if (error) {
 				NProgress.done();
@@ -25,6 +34,7 @@ var RethinkApiUtils = {
 		NProgress.start();
 		request
 		.get(API_URL+'/courses/'+id)
+		.set('x-auth-token', jwt)
 		.end(function(error, response){		
 			if (error) {
 				NProgress.done();
@@ -45,6 +55,7 @@ var RethinkApiUtils = {
 		NProgress.start();
 		request
 		.get(API_URL+'/get-course-progress/'+id+'/users/?' + URL_Mapping)
+		.set('x-auth-token', jwt)
 		.end(function(error, response){		
 			if (error) {
 				NProgress.done();

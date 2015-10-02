@@ -9,6 +9,7 @@ var LoadingBar = require('./../loadingBar/loadingBar');
 var ChapterSelection = require('./chaptersSelection');
 var ClassListSelection = require('./classListSelection');
 var DisplayChapter = require('./displayChapter');
+var LoginStore = require('./../../stores/LoginStore');
 
 var _ = require('lodash');
 var ReactBootstrap = require('react-bootstrap'),
@@ -22,6 +23,7 @@ function getAppStateFromStores(){
   var users = AppStore.getUsers();
   var chapterMapping = AppStore.getChapterInformation();
   var sessions = AppStore.getSessions();
+  var teacher = LoginStore.getTeacher();
   var chapters = AppStore.getChapters();
   var selectedChapter = AppStore.getSelectedChapter();
   var courseProgress = AppStore.getCourseProgress();
@@ -29,6 +31,7 @@ function getAppStateFromStores(){
     return ({
       selectedChapter:selectedChapter,
       users:users,
+      teacher:teacher,
       courseProgress:courseProgress,
       chapters:chapters,
       chapterMapping:chapterMapping,
@@ -40,6 +43,7 @@ function getAppStateFromStores(){
   return ({
       selectedChapter:selectedChapter,
       users:users,
+      teacher:teacher,
       chapters:chapters,
       courseProgress:courseProgress,
       chapterMapping:chapterMapping,
@@ -58,7 +62,8 @@ var ChapterView = React.createClass({
   },
 
   componentWillMount: function() {
-    var userIds = ["teach01","teach02","teach03","teach04","teach10","teach11"];
+    console.log( "teacher", this.state.teacher );
+    var userIds = this.state.teacher.usersInClass;
     var today = new Date();
     today.setDate( today.getDate() - 7 );
     var fromDateTime = today.getMilliseconds();

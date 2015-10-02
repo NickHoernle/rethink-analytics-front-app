@@ -36,7 +36,11 @@
     "moment":"^2.10.6",
     "react-bootstrap":"^0.25.1",
     "react-loading":"^0.0.7",
-    "watchify": "^3.2.3"
+    "react-mixin": "^1.1.0",
+    "reqwest": "^1.1.5",
+    "when": "^3.7.2",
+    "watchify": "^3.2.3",
+    "jwt-decode":"^1.4.0"
     },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
