@@ -8,13 +8,14 @@ var Router = require('react-router');
 var RouterContainer = require('./RouterContainer');
 var Route = Router.Route;
 var RouteHandler = Router.RouteHandler;
+var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
 
 var AuthService = {
 
   loadTeacherInformation: function( id, jwt ) {
     NProgress.start();
     request
-    .get( 'http://localhost:8080/teacher/' + id )
+    .get( API_URL + '/teacher/' + id )
     .set("x-auth-token", jwt)
     .end(function(error, response){
       if (error){
@@ -52,7 +53,7 @@ var AuthService = {
     LoginActions.logoutUser();
     NProgress.start();
     request
-    .get("http://localhost:8080"+"/logout" )
+    .get(API_URL +"/logout" )
     .end(function(error, response){
       if (error){
         console.log("Server error, please try again later");
