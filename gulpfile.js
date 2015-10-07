@@ -1,15 +1,16 @@
-var gulp = require ('gulp');
+var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 var htmlreplace = require('gulp-html-replace');
 var source = require('vinyl-source-stream');
 var browserify = require('browserify');
 var watchify = require('watchify');
+var reactify = require('reactify');
 var streamify = require('gulp-streamify');
 var browserSync = require('browser-sync');
 var watch = require('gulp-watch');
-var reactify = require('reactify');
 var minifyCSS = require('gulp-minify-css');
 var concat = require('gulp-concat');
+
 
 var path = {
   HTML: 'src/index.html',
@@ -23,6 +24,11 @@ var path = {
   CSS_SRC: './src/css/**/*.css'
 };
 
+gulp.task('copy', function(){
+  gulp.src(path.HTML)
+    .pipe(gulp.dest(path.DEST));
+});
+
 gulp.task('watch', function() {
   gulp.watch(path.HTML, ['copy', browserSync.reload]);
   gulp.watch(path.DEST_SRC + '/' + path.BUILD, ['copy', browserSync.reload]);
@@ -34,8 +40,10 @@ gulp.task('watch', function() {
   var watcher  = watchify(browserify({
     entries: [path.ENTRY_POINT],
     transform: [reactify],
-    debug: true,
-    cache: {}, packageCache: {}, fullPaths: true
+    //debug: true,
+    cache: {}, 
+    packageCache: {}, 
+    fullPaths: true
   }));
 
   return watcher.on('update', function () {
@@ -43,16 +51,22 @@ gulp.task('watch', function() {
       .pipe(source(path.BUILD))
       .pipe(gulp.dest(path.DEST_SRC))
       console.log('Updated');
-
   })
     .bundle()
     .pipe(source(path.BUILD))
     .pipe(gulp.dest(path.DEST_SRC));
 });
 
+gulp.task('minify-css', function() {
+  return gulp.src(path.CSS_SRC)
+    .pipe(minifyCSS({keepBreaks:true}))
+    .pipe(concat('style.min.css'))
+    .pipe(gulp.dest(path.DEST_BUILD))
+});
+
 gulp.task('browser-sync', function() {
-    browserSync({
-        open: false,
+    browserSync.init({
+        port: 3001,
         server: {
             baseDir: "./dist/"
         },
@@ -65,13 +79,6 @@ gulp.task('browser-sync', function() {
     });
 });
 
-gulp.task('minify-css', function() {
-  return gulp.src(path.CSS_SRC)
-    .pipe(minifyCSS({keepBreaks:true}))
-    .pipe(concat('style.min.css'))
-    .pipe(gulp.dest(path.DEST_BUILD))
-});
-
 gulp.task('build', function(){
   browserify({
     entries: [path.ENTRY_POINT],
@@ -79,7 +86,7 @@ gulp.task('build', function(){
   })
     .bundle()
     .pipe(source(path.MINIFIED_BUILD))
-    .pipe(streamify(uglify()))
+    //.pipe(streamify(uglify()))
     .pipe(gulp.dest(path.DEST_BUILD));
 });
 
@@ -88,11 +95,6 @@ gulp.task('replaceHTML', function(){
     .pipe(htmlreplace({
       'js': 'build/' + path.MINIFIED_BUILD
     }))
-    .pipe(gulp.dest(path.DEST));
-});
-
-gulp.task('copy', function(){
-  gulp.src(path.HTML)
     .pipe(gulp.dest(path.DEST));
 });
 

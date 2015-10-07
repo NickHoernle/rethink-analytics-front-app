@@ -1,5 +1,5 @@
 var AppDispatcher = require('../dispatchers/app-dispatcher');
-var LoginConstants = require('../constants/LoginConstants');
+var AppConstants = require('../constants/app-constants');
 var RouterContainer = require('../utils/RouterContainer');
 
 var LoginActions =  {
@@ -13,24 +13,40 @@ var LoginActions =  {
       teacher:teacher
     };
     AppDispatcher.handleLoginAction({
-      type: LoginConstants.LOGIN_USER,
+      type: AppConstants.LoginConstants.LOGIN_USER,
       payload: payload
     });
   },
 
   logoutUser: function() {
+    window.localStorage.clear();
     localStorage.removeItem('jwt');
+    localStorage.clear();
+    RouterContainer.get().transitionTo("/login");
     AppDispatcher.handleLoginAction({
-      type: LoginConstants.LOGOUT_USER
+      type: AppConstants.LoginConstants.LOGOUT_USER
     });
   },
 
   loadTeacher: function( response ){
     AppDispatcher.handleLoginAction({
-      type: LoginConstants.LOAD_TEACHER,
+      type: AppConstants.LoginConstants.LOAD_TEACHER,
       payload: response
     });
-  }
+  },
+  
+  selectClass: function( classId ) {
+    AppDispatcher.handleLoginAction({
+      type: AppConstants.LoginConstants.SELECT_CLASS,
+      payload: classId
+    });
+  },
+
+  deselectClass: function( ) {
+    AppDispatcher.handleLoginAction({
+      type: AppConstants.LoginConstants.DESELECT_CLASS
+    });
+  },
 }
 
 module.exports = LoginActions;

@@ -7,12 +7,13 @@ var RecentChaptersDisplay = React.createClass({
 		var userChapters = this.props.userChapters;
 		if ( userChapters ) {
 			if ( userChapters.length > 0 ) {
-				userChapters.sort(function(a, b){return b.lastActiveOnCourse-a.lastActiveOnCourse});
+				var chapters = userChapters.sort(function(a, b){ return b.lastActiveOnCourse-a.lastActiveOnCourse} ).map(function( chapter , i ) {
+					return ( <td key={i}><TopicCompletionBattery key={i} chapter={chapter} chapterMapping={chapterMapping} /></td> );
+				});
 				return (
 					<table>
 						<tr>
-							<td><TopicCompletionBattery chapter={userChapters[0]} chapterMapping={chapterMapping} /></td>
-							<td><TopicCompletionBattery chapter={userChapters[1]} chapterMapping={chapterMapping} /></td>
+							{chapters}
 						</tr>
 					</table>
 				)

@@ -35,9 +35,8 @@ var InteractionDisplay = React.createClass({
   	render:function(){
       var interaction = this.props.interaction;
       var key = this.props.key;
-      var me = this;
-      var grade = me.props.selectedChapter.grade;
-      var subject = me.props.selectedChapter.subject;
+      var grade = this.props.selectedChapter.grade;
+      var subject = this.props.selectedChapter.subject;
       if ( subject == "NATURAL_SCIENCE" ) {
         subject = "NATURAL%20SCIENCE";
       }
@@ -46,22 +45,22 @@ var InteractionDisplay = React.createClass({
       switch ( interaction.type ) {
         case "instruction":
           return (
-                  <div className="bubble me" key={me.props.key}>
+                  <div className="bubble me" key={this.props.key}>
                     <div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
                   </div>
             );
         case "prompt":
           return (
                   <div>
-                    <div className="bubble me" key={me.props.key}>
+                    <div className="bubble me" key={this.props.key}>
                       <div dangerouslySetInnerHTML={createMarkup(sanitizedInteraction)} />
                     </div>
-                    <div className="bubble you" key={me.props.key}>
-                    <UserResponse interactionId={interaction.id} users={me.props.users} sessions={me.props.sessions} courseProgress={me.props.courseProgress} selectedChapter={me.props.selectedChapter} />
+                    <div className="bubble you" key={this.props.key}>
+                    <UserResponse interactionId={interaction.id} {...this.props} />
                     </div>
                   </div>
               );
-        default:
+        default: 
           return (
               <div />
             );

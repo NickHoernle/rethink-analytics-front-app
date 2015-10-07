@@ -15,21 +15,20 @@ var ReactBootstrap = require('react-bootstrap'),
 
 var UserResponse = React.createClass({
   	render:function(){
-  		var me = this;
   		var showResponse = false;
-  		var activeUsers = _.sortBy( _.filter( me.props.users, {'selected':true}), 'lastActive' ).map( function (user, i) {
-	  		var myCourseProgress = me.props.courseProgress[user.id];
+  		var activeUsers = _.sortBy( _.filter( this.props.users, {'selected':true}), 'lastActive' ).map( function (user, i) {
+	  		var myCourseProgress = _.find( this.props.courseProgress , {"userId" : user.id } );
 	  		var lastActive = new Date(user.lastActive);
-	  		var myResponse = _.find( myCourseProgress.interactionResponses, {'id': me.props.interactionId} );
-	  		var title = user.firstname + " " + user.lastname + " : " + lastActive.getDate() + "/" + lastActive.getMonth() + "/" + lastActive.getYear();
+	  		var myResponse = _.find( myCourseProgress.interactionResponses, {'id': this.props.interactionId} );
+	  		var title = user.firstname + " " + user.lastname;// + " : " + lastActive.getDate() + "/" + lastActive.getMonth() + "/" + lastActive.getYear();
 	  		showResponse = true;
 	  		if ( myResponse ) {
-	  			if ( !myResponse.correctMarking ) {
-	  				myResponse.correctMarking=0; //undefined
+	  			if ( !myResponse.correct ) {
+	  				myResponse.correct=0; //undefined
 	  			}
 	  			var correct;
 		  		if ( myResponse.response ) {
-		  				switch (myResponse.correctMarking){
+		  				switch (myResponse.correct){
 		  					case 0: //undefined or don't know
 		  						correct='primary';
 		  						break;
@@ -45,14 +44,14 @@ var UserResponse = React.createClass({
 					      <table style={{width:"100%"}}>
 					      	<tr>
 					      		<td>{myResponse.response}</td>
-					      		<td align="right"><MarkingButtons user={user.id} courseProgress={myCourseProgress.id} interactionId={me.props.interactionId} /></td>
+					      		<td align="right"><MarkingButtons user={user.id} courseProgress={myCourseProgress.id} interactionId={this.props.interactionId} /></td>
 					      	</tr>
 					      </table>
 					    </Panel> 
 					);
 		  		}
 		  	}
-	  	});
+	  	}, this );
 		if ( showResponse ){
 	  		return (
 	  			<div>{activeUsers}</div>

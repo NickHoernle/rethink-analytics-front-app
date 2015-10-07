@@ -1,6 +1,6 @@
 var reqwest = require('reqwest');
 var when = require('when');
-var LoginConstants = require('../constants/LoginConstants');
+var AppConstants = require('../constants/app-constants');
 var LoginActions = require('../actions/LoginAction');
 var NProgress = require('nprogress-npm');
 var request = require('superagent');
@@ -8,8 +8,8 @@ var Router = require('react-router');
 var RouterContainer = require('./RouterContainer');
 var Route = Router.Route;
 var RouteHandler = Router.RouteHandler;
-var API_URL = process.env.API_URL || "http://rethink-data.herokuapp.com";
-//var API_URL = process.env.API_URL || "http://localhost:8080";
+
+var API_URL = AppConstants.BASE_URL;
 
 var AuthService = {
 
@@ -33,13 +33,13 @@ var AuthService = {
   login: function( username, password ) {
     NProgress.start();
     request
-    .post( LoginConstants.LOGIN_URL )
+    .post( API_URL + "sessions/create" )
     .set('accept', 'application/json')
     .send({ username:username, password:password})
     .end(function(error, response){
       if (error){
         localStorage.removeItem('jwt');
-        //RouterContainer.get().transitionTo('/login');
+        RouterContainer.get().transitionTo('#/login');
         console.log("error", error);
         alert(error);
         NProgress.done();
@@ -70,7 +70,7 @@ var AuthService = {
 
   signup: function(username, password, extra) {
     return this.handleAuth(when(reqwest({
-      url: LoginConstants.SIGNUP_URL,
+      url: AppConstants.LoginConstants.SIGNUP_URL,
       method: 'POST',
       crossOrigin: true,
       type: 'json',

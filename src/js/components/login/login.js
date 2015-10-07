@@ -24,22 +24,42 @@ var RouterContainer = require('./../../utils/RouterContainer');
 var Login = React.createClass({
   getInitialState: function() {
     var loggedInUser = false;
-    var teacher = LoginStore.getTeacher();
-    if( teacher != null )
+    var requestAddress = LoginStore.getInitialRequestAddress();
+    if( LoginStore.getTeacher() != null ){
       loggedInUser = true;
+    }
     return (
         {
-          teacher:teacher,
           loggedInUser: loggedInUser,
           emailAddress:'',
-          password:''
+          password:'',
+          requestAddress:requestAddress
         }
     );
   },
 
   login: function() {
     AuthService.login( this.state.emailAddress, this.state.password );
-    console.log("Attempting login");
+  },
+
+  componentDidMount: function() {
+    LoginStore.addChangeListener(this._onChange);
+  },
+
+  componentWillUnmount: function() {
+    LoginStore.removeChangeListener(this._onChange);
+  },
+
+  _onChange: function() {
+    if ( LoginStore.getTeacher() != null ){
+      this.setState( { loggedInUser: true } );
+    }
+  },
+
+  keyPress: function( event ) {
+    if( event.which == 13 ) {
+      AuthService.login( this.state.emailAddress, this.state.password );
+    }
   },
 
   handleChange: function( event ) {
@@ -56,7 +76,7 @@ var Login = React.createClass({
   render:function(){
     if (!this.state.loggedInUser) {
       return (
-        <div>
+        <div onKeyPress={this.keyPress}>
           <center>
             <img id="Image-Rethink" src="http://res.cloudinary.com/he6wnpmm5/image/upload/v1435582819/sponsors/rethinkeducation.png" height="83px" width="256px"></img>
             <p><br/></p>
@@ -84,7 +104,14 @@ var Login = React.createClass({
       )
     }
     else {
-      RouterContainer.get().transitionTo('/');
+      if ( LoginStore.getTeacher().classes == null ){
+        RouterContainer.get().transitionTo("/create-class");
+      }
+      if ( this.state.requestAddress == "/login" || !this.state.requestAddress ){
+        RouterContainer.get().transitionTo("/home");
+      } else {
+        RouterContainer.get().transitionTo(this.state.requestAddress);
+      }
       return ( null );
     }
   }

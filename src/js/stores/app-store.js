@@ -7,11 +7,20 @@ var EventEmitter = require('events').EventEmitter;
 
 var CHANGE_EVENT = 'change';
 
-var _chapterInformation = [];
+var _chapterInformation = []; // stores a mapping of chapterId to chapter information createdDateTime, grade, gradeName, name, subjectName
+
+var selectedChapter = null; //used
+
+var _users = []; // used
+
+var _chaptersDoneByUsers = []; // used
+
+var courseProgressForAllUsers = null; // used
+
+var markedAnswers = []; //used
+
 
 var _usersSessionView = [];
-
-var _users = [];
 
 var _viewToDateTime = new Date();
 
@@ -19,92 +28,27 @@ var _viewFromDateTime = new Date( _viewToDateTime.getDate() - 7 );
 
 var _sessions = [];
 
-var _chaptersDoneByUsers = [];
-
-var courseProgress = null;
-
 var loadedChapters = [];
 
-var selectedChapter = null;
 
-var markedAnswers = [];
-
-function _getMostRecentSessionForUser(userId, sessions) {
-   var timeDate = 0;
-    for ( i = 0; i < sessions.length; i++ ) {
-      if ( sessions[i].endDateTime > timeDate ){
-        timeDate = sessions[i].endDateTime;
-      }
-    }
-    return timeDate;
-}
-
-function markUserResponsesInChapter( users, selectedChapter, courseProgress ) {
-  markedAnswers = [];
-  if ( selectedChapter != null ){
-    selectedChapter.interactions.map( function ( interaction, k ){
-      var markedUsers = _users.map( function (user, i ) {
-        if ( user.selected == true ){
-          if ( courseProgress[user.id] ) {
-            var myCourseProgress = courseProgress[user.id];
-            var myResponse = _.find( myCourseProgress.interactionResponses, {'id': interaction.id} );
-            if ( myResponse ) {
-              if ( !myResponse.correctMarking ) {
-                myResponse.correctMarking=0; //undefined
-              }
-              if ( myResponse.response ) {
-                markedAnswers.push({
-                  userId:user.id,
-                  courseProgressId:myCourseProgress.id,
-                  interactionId:interaction.id,
-                  correctMarking:myResponse.correctMarking
-                });
-              }
-            }
-          }
-        }
-      });
-    });
-  }
-}
-
-function _markInteraction(userId, courseProgressId, interactionId, correct) {
-  _.find( courseProgress[userId].interactionResponses, {'id':interactionId } ).correctMarking = correct;
-  if ( _.find( markedAnswers, function(answer){
-    return ( answer.userId == userId && answer.courseProgressId == courseProgressId && answer.interactionId == interactionId)
-  })){
-    _.find(markedAnswers, { 'userId':userId, 'courseProgressId':courseProgressId, 'interactionId':interactionId }).correctMarking = correct;
-  } else {
-    markedAnswers.push({
-      userId:userId,
-      courseProgressId:courseProgressId,
-      interactionId:interactionId,
-      correctMarking:correctMarking
-    });
-  }
+function _logout(){
+    _chapterInformation = [];
+    _usersSessionView = [];
+    _users = [];
+    _viewToDateTime = new Date();
+    _viewFromDateTime = new Date( _viewToDateTime.getDate() - 7 );
+    _sessions = [];
+    _chaptersDoneByUsers = [];
+    courseProgressForAllUsers = null;
+    loadedChapters = [];
+    selectedChapter = null;
+    markedAnswers = [];
 }
 
 function _loadCourseProgress( _courseProgress ) {
-  courseProgress = _courseProgress;
+  courseProgressForAllUsers = _courseProgress;
 }
 
-function _selectUser( userId ) {
-  _users.forEach( function ( n, key ) {
-    if ( n.id == userId ) {
-      _users[key].selected = true;
-    }
-  });
-  markUserResponsesInChapter( _users, selectedChapter, courseProgress );
-}
-
-function _deselectUser( userId ) {
-  _users.forEach( function ( n, key ) {
-    if ( n.id == userId ) {
-      _users[key].selected = false;
-    }
-  });
-  markUserResponsesInChapter( _users, selectedChapter, courseProgress );
-}
 
 function _selectChapter( id ) {
   if ( loadedChapters[ id ] != null ) {
@@ -123,6 +67,17 @@ function _loadChapter( chapter ) {
 
 function _loadSessionData( sessions ){
   _sessions = sessions; 
+}
+
+
+function _getMostRecentSessionForUser(userId, sessions) {
+   var timeDate = 0;
+    for ( i = 0; i < sessions.length; i++ ) {
+      if ( sessions[i].endDateTime > timeDate ){
+        timeDate = sessions[i].endDateTime;
+      }
+    }
+    return timeDate;
 }
 
 function _loadChapterInformation( chapters ){
@@ -210,18 +165,14 @@ var AppStore = assign(EventEmitter.prototype, {
     this.removeListener(CHANGE_EVENT, callback)
   },
 
-  logout: function(){
-    this._chapterInformation = [];
-    this._usersSessionView = [];
-    this._users = [];
-    this._viewToDateTime = new Date();
-    this._viewFromDateTime = new Date( _viewToDateTime.getDate() - 7 );
-    this._sessions = [];
-    this._chaptersDoneByUsers = [];
-    this.courseProgress = null;
-    this.loadedChapters = [];
-    this.selectedChapter = null;
-    this.markedAnswers = [];
+  //used
+  getUsers: function(){ //get student's in class
+    return _users;
+  },
+
+  //used
+  getChapterInformation: function() {
+    return _chapterInformation;
   },
 
   getViewFromDateTime: function() {
@@ -230,10 +181,6 @@ var AppStore = assign(EventEmitter.prototype, {
 
   getViewToDateTime: function() {
     return _viewToDateTime;
-  },
-  
-  getUsers: function(){
-    return _users;
   },
 
   getFromDateTime: function(){
@@ -244,11 +191,7 @@ var AppStore = assign(EventEmitter.prototype, {
     return _sessions;
   },
 
-  getChapterInformation: function() {
-    return _chapterInformation;
-  },
-
-  getChapters: function() {
+  getChaptersDoneByUsers: function() {
     return _chaptersDoneByUsers;
   },
 
@@ -257,9 +200,10 @@ var AppStore = assign(EventEmitter.prototype, {
   },
 
   getCourseProgress: function() {
-    return courseProgress;
+    return courseProgressForAllUsers;
   },
 
+  //used
   getAnswersArray: function() {
     return markedAnswers;
   },
@@ -267,32 +211,35 @@ var AppStore = assign(EventEmitter.prototype, {
   dispatcherIndex: AppDispatcher.register(function(payload){
     var action = payload.action; // this is our action from handleViewAction
     switch(action.type){
-      case AppConstants.ADD_ITEM:
-        _addItem(payload.action.item);
-        break;
-
-      case AppConstants.REMOVE_ITEM:
-        _removeItem(payload.action.index);
-        break;
-
-      case AppConstants.INCREASE_ITEM:
-        _increaseItem(payload.action.index);
-        break;
-
       case AppConstants.UserActions.SELECT_CHAPTER:
         _selectChapter( action.id );
         break;
 
       case AppConstants.UserActions.SELECT_USER:
-        _selectUser( action.id );
+        _.find( _users , {'id':action.id } ).selected = true;
+        break;
+
+      case AppConstants.UserActions.SELECT_ALL_USERS:
+        _users.forEach( function ( n, key ) {
+          if( action.userIds.indexOf( n.id ) >= 0){
+            _users[key].selected = true;
+          }
+        });
+        break;
+
+      case AppConstants.UserActions.DESELECT_ALL_USERS:
+        _users.forEach( function ( n, key ) {
+          _users[key].selected = false;
+        });
         break;
 
       case AppConstants.UserActions.DESELECT_USER:
-        _deselectUser( action.id );
+        _.find( _users , {'id':action.id } ).selected = false;
         break;
 
       case AppConstants.UserActions.MARK_RESPONSE:
-        _markInteraction(action.userId, action.courseId, action.interactionId, action.correct);
+        console.log ( action )
+        _.find( _.find( courseProgressForAllUsers, {"userId":action.userId} ).interactionResponses , {"id": action.interactionId} ).correct = action.correct;
         break;
 
       case AppConstants.UserActions.LOAD_MARKED_RESPONSES:
@@ -313,10 +260,15 @@ var AppStore = assign(EventEmitter.prototype, {
 
       case AppConstants.ServerActions.LOAD_COURSE_PROGRESS:
         _loadCourseProgress(action.payload);
+        console.log( action.payload );
         break;
 
       case AppConstants.ServerActions.LOAD_CHAPTERS_DATA:
         _loadChapterInformation(action.payload);
+      break;
+
+      case AppConstants.LoginConstants.LOGOUT_USER:
+        _logout();
       break;
     }
 

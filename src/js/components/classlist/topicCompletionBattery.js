@@ -6,6 +6,12 @@ var ReactBootstrap = require('react-bootstrap'),
   ButtonToolbar = ReactBootstrap.ButtonToolbar,
   Panel = ReactBootstrap.Panel;
 
+var RouterContainer = require('./../../utils/RouterContainer');
+var RethinkApiUtils = require('./../../utils/app-rethinkDataApiUtils')
+var AppActions = require('./../../actions/app-actions');
+var AppStore = require('./../../stores/app-store');
+var LoginStore = require('./../../stores/LoginStore');
+
   function createMarkupHeader( name, grade ) { return {__html: '<b>Grade ' + grade + ':</b><br/>' + name }; };
   function createMarkupFooter( date ) { return {__html: '<i>' + date + '</i>'}; };
 
@@ -24,6 +30,12 @@ var ReactBootstrap = require('react-bootstrap'),
   month[11] = "Dec";
   
   var TopicCompletionBattery = React.createClass({
+  handleClick: function( event ) {
+    AppActions.selectChapter( this.props.chapter.courseId );
+    RethinkApiUtils.loadCourseProgress(  this.props.chapter.courseId , LoginStore.getCurrentClass() );
+    RouterContainer.get().transitionTo('/chapterview');
+  },
+
  	render:function(){
     if ( this.props.chapter ) {
    		var chapterMapping = this.props.chapterMapping;
@@ -36,8 +48,9 @@ var ReactBootstrap = require('react-bootstrap'),
         fontSize:"11px",
         textAlign:"center"
       };
+
    		return (
-        <Panel bsSize={"xsmall"} style={{marginBottom:"0px", width:250}}>
+        <Panel className="chapterButton" id={this.props.chapter.courseId} bsSize={"xsmall"} style={{marginBottom:"0px", width:250}} onDoubleClick={this.handleClick}>
           <div dangerouslySetInnerHTML={createMarkupHeader( name, grade )} style={{ marginTop:"0px", fontSize:"11px"}} />
           <ProgressBar now={completion} label='%(percent)s%' bsSize={"xsmall"}  style={{marginBottom:"0px"}}/>
           <div dangerouslySetInnerHTML={createMarkupFooter( thisDate.getDate() + "/" + month[thisDate.getMonth()] + "/" +thisDate.getFullYear() )} style={style1} />

@@ -9,3 +9,4 @@
 .you,.you::before{background-color:#A3D1FF}
 .you{float:right;margin:5px 20px 5px 45px;box-shadow:-2px 2px 2px 0 rgba(51,51,51,.4);left:-9px}
 .you::before{box-shadow:2px -2px 2px 0 rgba(51,51,51,.4);right:-9px}
+.chapterButton{cursor:pointer}

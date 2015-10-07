@@ -1,14 +1,14 @@
 var React = require('react');
 var _ = require('lodash');
-var SelectChapter = require('./selectChapter');
 var ReactBootstrap = require('react-bootstrap'),
-    DropdownButton = ReactBootstrap.DropdownButton,
+    Button = ReactBootstrap.Button,
+    Table = ReactBootstrap.Table,
     ButtonToolbar = ReactBootstrap.ButtonToolbar,
-    Tabs = ReactBootstrap.Tabs,
-    ButtonGroup = ReactBootstrap.ButtonGroup,
-    Panel = ReactBootstrap.Panel,
-    Tab = ReactBootstrap.Tab;
+    ButtonGroup = ReactBootstrap.ButtonGroup;
 
+var AppActions = require('../../actions/app-actions');
+var RethinkApiUtils = require('../../utils/app-rethinkDataApiUtils');
+var LoginStore = require('../../stores/LoginStore');
 
 function getFilteredAndSortedChapters( chapters, fromDate, toDate ) {
     var _chapters = _.sortBy( _.filter( chapters, function( ch ) {
@@ -18,7 +18,14 @@ function getFilteredAndSortedChapters( chapters, fromDate, toDate ) {
 };
 
 var ChapterSelection = React.createClass({
+  chapterSelectionHandler: function( event ) {
+    AppActions.selectChapter( event.target.id );
+    RethinkApiUtils.loadCourseProgress(  event.target.id, LoginStore.getCurrentClass() );
+  },
+
   render: function() {
+    console.log( show );
+
     var users = _.map(this.props.users, 'id');
     var chapterMapping = this.props.chapterMapping;
     var now = new Date();
@@ -29,50 +36,60 @@ var ChapterSelection = React.createClass({
 
     var ChaptersAccessedLastWeek = _.map( getFilteredAndSortedChapters( this.props.chapters, lastWeek, now ), function ( chapter , i ) {
   		if ( chapterMapping[chapter.id] ) {
+        var label=chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")";
   			return (
-  					<SelectChapter users={users} label={chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")" } id={chapter.id} key={i} />
+            <Button id={chapter.id} onClick={this.chapterSelectionHandler}>{label}</Button>
   				);
   		}
-  	});
+  	}, this);
 
     var ChaptersAccessedTwoWeeksAgo = _.map( getFilteredAndSortedChapters( this.props.chapters, twoWeeksAgo, lastWeek), function ( chapter , i ) {
       if ( chapterMapping[chapter.id] ) {
+        var label=chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")";
         return (
-            <SelectChapter users={users} label={chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")" } id={chapter.id} key={i} />
+            <Button id={chapter.id} onClick={this.chapterSelectionHandler}>{label}</Button>
           );
       }
-    });
+    }, this);
 
     var ChaptersOlderThanThat = _.map( getFilteredAndSortedChapters( this.props.chapters, 0, twoWeeksAgo ), function ( chapter , i ) {
       if ( chapterMapping[chapter.id] ) {
+        var label=chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")";
         return (
-            <SelectChapter users={users} label={chapterMapping[chapter.id].name + " (" + chapterMapping[chapter.id].grade + ")" } id={chapter.id} key={i} />
+            <Button id={chapter.id} onClick={this.chapterSelectionHandler}>{label}</Button>
           );
       }
-    });
-
-    /*var disabled1 = Object.keys( ChaptersAccessedLastWeek ).length;
-    var disabled2 = Object.keys( ChaptersAccessedTwoWeeksAgo ).length;
-    var disabled3 = Object.keys( ChaptersOlderThanThat ).length;*/
-
+    }, this);
+    
+    var style = {width:"33%", height:"100px"};
   	return (
-        <Tabs defaultActiveKey={1} position='left' tabWidth={3}>
-          <Tab eventKey={1} title='Chapters Accessed Last Week'>
-            <ButtonGroup vertical style={{height:"180px" , overflowY:"scroll"}}>
-              {ChaptersAccessedLastWeek}
-            </ButtonGroup>
-          </Tab>
-          <Tab eventKey={2} title='Chapters Two Weeks Ago'>
-            <ButtonGroup vertical style={{height:"180px" , overflowY:"scroll"}}>
-              {ChaptersAccessedTwoWeeksAgo}
-            </ButtonGroup>
-          </Tab>
-          <Tab eventKey={3} title='Old Chapters'>
-            <ButtonGroup vertical style={{height:"180px" , overflowY:"scroll"}}>
-              {ChaptersOlderThanThat}
-            </ButtonGroup>
-          </Tab>
-        </Tabs>
+        <Table striped bordered>
+          <thead>
+            <tr>
+              <td>Worked on in the Last Week</td>
+              <td>Worked on two Weeks Ago</td>
+              <td>Worked on Previously</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={style}>
+                <ButtonGroup vertical style={{height:"100px" , overflowY:"scroll"}}>
+                  {ChaptersAccessedTwoWeeksAgo}
+                </ButtonGroup>
+              </td>
+              <td style={style}>
+                <ButtonGroup vertical style={{height:"100px" , overflowY:"scroll"}}>
+                  {ChaptersAccessedTwoWeeksAgo}
+                </ButtonGroup>
+              </td>
+              <td style={style}>
+                <ButtonGroup vertical style={{height:"100px" , overflowY:"scroll"}}>
+                  {ChaptersOlderThanThat}
+                </ButtonGroup></td>
+            </tr>
+          </tbody>
+        </Table>
   	);
   }
 });

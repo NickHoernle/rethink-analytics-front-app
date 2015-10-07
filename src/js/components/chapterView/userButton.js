@@ -1,12 +1,13 @@
 var React = require('react');
 var _ = require('lodash');
-var AppActions = require('../../actions/app-actions');
 var ReactBootstrap = require('react-bootstrap'),
 	ButtonToolbar = ReactBootstrap.ButtonToolbar,
 	Glyphicon = ReactBootstrap.Glyphicon,
 	Button = ReactBootstrap.Button,
 	ProgressBar = ReactBootstrap.ProgressBar,
 	Well = ReactBootstrap.Well;
+
+var AppActions = require('../../actions/app-actions');
 
 var UserButton = React.createClass({
 	handler: function(){

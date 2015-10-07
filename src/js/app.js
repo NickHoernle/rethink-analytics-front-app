@@ -6,7 +6,6 @@ var Route = Router.Route;
 var RouteHandler = Router.RouteHandler;
 var DefaultRoute = Router.DefaultRoute;	
 var RouterContainer = require('./utils/RouterContainer')
-var AuthenticatedApp = require('./components/login/AuthenticatedApp');
 var HomePage = require('./components/homepage/app-homepage');
 var classList = require('./components/classlist/app-classlist');
 var ChapterView = require('./components/chapterView/chapterView');
@@ -21,10 +20,10 @@ var AuthService = require('./utils/AuthService');
 var jwt_decode = require('jwt-decode');
 
 var routes = (
-  <Route handler={AuthenticatedApp}>
-    <Route name="login" handler={Login}/>
-    <Route name="signup" handler={Signup}/>
-    <Route name="home" path="/" handler={HomePage}/>
+  <Route handler={Template}>
+    <Route name="/login" handler={Login}/>
+    <Route name="/signup" handler={Signup}/>
+    <Route path="/home" handler={HomePage}/>
     <Route path="/sessionsdashboard" handler={SessionDashboard} />
     <Route path="/classlist" handler={classList} />
     <Route path="/chapterview" handler={ChapterView} />
@@ -39,6 +38,6 @@ if (jwt && !LoginStore.getTeacher() ) {
   AuthService.loadTeacherInformation( jwt_decode(jwt).sub , jwt );
 }
 
-Router.run(routes, function (Handler, state) {  
+Router.run(routes, function (Handler, state) { 
   React.render(<Handler {...state}/>, document.body);
 });

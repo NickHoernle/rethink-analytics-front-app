@@ -1,8 +1,6 @@
 var React = require('react');
 var AppStore = require('../../stores/app-store');
 var ApiActionCreators = require('../../actions/ApiActionCreators');
-var StoreWatchMixin = require('../../mixins/StoreWatchMixin');
-var AnalyticsApiUtils = require('../../utils/app-analyticsApiUtils');
 var RethinkApiUtils = require('../../utils/app-rethinkDataApiUtils');
 var LoadingBar = require('./../loadingBar/loadingBar');
 var DayPicker = require('./dateRangePicker');
@@ -38,19 +36,18 @@ var SessionDashboard = React.createClass({
   },
 
   componentWillMount: function() {
-    console.log( "teacher", this.state.teacher );
     var userIds = this.state.teacher.usersInClass;
     var today = new Date();
     today.setDate( today.getDate() - 7 );
     var fromDateTime = today.getMilliseconds();
     if ( this.state.users.length < 1 ) {
-      AnalyticsApiUtils.loadUsers( userIds );
+      RethinkApiUtils.loadUsers( userIds );
     }
     if ( this.state.chapterMapping.length < 1 ) {
       RethinkApiUtils.loadChapterInformation();
     }
     if ( this.state.sessions.length < 1 ) {
-      AnalyticsApiUtils.loadSessions(userIds,fromDateTime);
+      RethinkApiUtils.loadSessions(userIds,fromDateTime);
     }
   },
 
